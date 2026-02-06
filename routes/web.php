@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 
 // non authenticated users only
@@ -19,8 +20,6 @@ Route::middleware('guest')->group(function(){
 
 // authenticated users only
 Route::middleware('auth')->group(function(){
-    Route::get('/', function(){
-        echo 'Hello, World!';
-    })->name('home');
+    Route::get('/', [MainController::class, 'home'])->name('home');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 });
