@@ -14,4 +14,5 @@ Route::middleware('auth')->group(function(){
     Route::get('/', function(){
         echo 'Hello, World!';
     })->name('home');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 });

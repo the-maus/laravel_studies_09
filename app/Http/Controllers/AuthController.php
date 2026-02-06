@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AuthController extends Controller
 {
@@ -14,7 +15,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function authenticate(Request $request) 
+    public function authenticate(Request $request) : RedirectResponse
     {
         // validate form
         $credentials = $request->validate(
@@ -69,5 +70,11 @@ class AuthController extends Controller
 
         // redirects to the page user was trying to access, in case there's no such page it redirects home
         return redirect()->intended(route('home'));
+    }
+
+    public function logout() : RedirectResponse
+    {
+        Auth::logout();
+        return redirect()->route('login');
     }
 }
