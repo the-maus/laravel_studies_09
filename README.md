@@ -1,4 +1,4 @@
-# Laravel Studies
+# Laravel Studies (Custom Authentication)
 Este projeto foi criado no contexto do curso
 Laravel Completo - Framework, ecossistema e Projetos Web (Udemy)
 @João Ribeiro
