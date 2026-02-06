@@ -1,27 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/',function(){
-    DB::connection()->getPdo();
-    echo 'Home';
-});
-
-// default (auth) laravel middleware accessible only to logged users
-Route::view('/test', 'test')->middleware('auth');
-
-Route::get('/login', function(){
-    echo "Login form";
-})->name('login');
-
-// default (guest) laravel middleware accessible only to non-logged users
+// non authenticated users only
 Route::middleware('guest')->group(function(){
-    Route::get('/register', function(){
-        echo "Register form";
-    })->name('register');
-    // can add more routes
+    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
 });
-Route::get('/register', function(){
-        echo "Register form";
-})->name('register')->middleware('guest');
+
+// authenticated users only
+Route::middleware('auth')->group(function(){
+    Route::get('/', function(){
+        echo 'Hello, World!';
+    })->name('home');
+});

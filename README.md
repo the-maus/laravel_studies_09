@@ -1,4 +1,4 @@
-# Laravel Studies (Custom Authentication)
+# Laravel Studies (Custom Authentication without Fortify/Breeze)
 Este projeto foi criado no contexto do curso
 Laravel Completo - Framework, ecossistema e Projetos Web (Udemy)
 @João Ribeiro
