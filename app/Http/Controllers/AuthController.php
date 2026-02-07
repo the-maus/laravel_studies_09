@@ -28,12 +28,6 @@ class AuthController extends Controller
                 'password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
             ],
             [
-                'username.required' => 'User field is required',
-                'username.min'      => 'User field must have at least :min characters',
-                'username.max'      => 'User field can\'t have more than :max characters',
-                'password.required' => 'Password field is required',
-                'password.min'      => 'Password field must have at least :min characters',
-                'password.max'      => 'Password field can\'t have more than :max characters',
                 'password.regex'    => 'Password must contain at least one lower-case letter, one upper-case letter and a number'
             ]
         );
@@ -150,5 +144,43 @@ class AuthController extends Controller
 
         // show success message
         return view('auth.new_user_confirmation');
+    }
+
+    public function profile() : View
+    {
+        return view('auth.profile');
+    }
+
+    public function changePassword(Request $request)
+    {
+        // form validation
+        $request->validate(
+            [
+                'current_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                'new_password'     => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/|different:current_password',
+                'new_password_confirmation' => 'required|same:new_password'
+            ],
+            [
+                'current_password.regex' => 'Current password must contain at least one lower-case letter, one upper-case letter and a number',
+                'new_password.regex' => 'New password must contain at least one lower-case letter, one upper-case letter and a number',
+            ]
+        );
+
+        // check if current password is correct
+        if (!password_verify($request->current_password, Auth::user()->password))
+            return back()->with(['server_error' => 'Current password is incorrect']);
+
+        // update password
+        $user = Auth::user();
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+
+        // update password on session
+        Auth::user()->password = $request->new_password;
+
+
+        // show success message
+        return redirect()->route('profile')->with(['success' => 'Password updated successfuly']);
+
     }
 }
