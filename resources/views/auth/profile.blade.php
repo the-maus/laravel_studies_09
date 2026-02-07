@@ -50,7 +50,21 @@
                         </div>
                     @endif
 
+                    <hr>
 
+                    <div class="card border-1 border-danger p-5 text-center">
+                        If you want to remove your user account permanently, type "REMOVE" and click the button bellow.
+                        <form action="{{ route('delete_account') }}" method="post">
+                            @csrf
+                            <div class="my-3">
+                                <input type="text" name="delete_confirmation" class="form-control text-center" id="">
+                                @error('delete_confirmation')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn-danger">DELETE ACCOUNT</button>
+                        </form>
+                    </div>
             </div>
         </div>
     </div>

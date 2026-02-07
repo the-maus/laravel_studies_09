@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function(){
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
     Route::post('/profile', [AuthController::class, 'changePassword'])->name('change_password');
 
+    // delete account
+    Route::post('/delete-account', [AuthController::class, 'deleteAccount'])->name('delete_account');
+
     // logout
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 });

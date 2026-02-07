@@ -198,7 +198,8 @@ return [
         'password' => 'Password',
         'new_password' => 'New password',
         'new_password_confirmation' => 'New password confirmation',
-        'current_password' => 'Current password'
+        'current_password' => 'Current password',
+        'delete_confirmation' => 'Confirmation'
     ],
 
 ];

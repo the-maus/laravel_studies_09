@@ -45,12 +45,17 @@
                         </p>
                     @endif
 
+                    @if(session('account_deleted'))
+                        <p class="alert alert-success text-center mt-3 p-2">
+                            Account deleted successfully
+                        </p>
+                    @endif
+
                     @if(session('invalid_login'))
                         <div class="alert alert-danger text-center mt-4">
                             {{ session('invalid_login') }}
                         </div>
                     @endif
-
 
                 </div>
             </div>

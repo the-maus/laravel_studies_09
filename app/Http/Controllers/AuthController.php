@@ -253,4 +253,24 @@ class AuthController extends Controller
 
         return redirect()->route('login')->with(['success' => true]);
     }
+
+    public function deleteAccount(Request $request)//: RedirectResponse
+    {
+        // validate form
+        $request->validate(['delete_confirmation' => 'required|in:DELETE']);
+
+        // remove user account
+        // soft delete
+        $user = Auth::user();
+        $user->delete();
+        // hard delete
+        // $user = Auth::user();
+        // $user->forceDelete();
+
+        // logout
+        Auth::logout();
+
+        // redirect to login
+        return redirect()->route('login')->with(['account_deleted' => true]);
+    }
 }
