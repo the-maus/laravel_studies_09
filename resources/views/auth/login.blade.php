@@ -26,11 +26,11 @@
                         <div class="row mt-4">
                             <div class="col">
                                 <div class="mb-3">
-                                    <a href="{{ route('register') }}">Não tenho conta de usuário</a>
+                                    <a href="{{ route('register') }}">I don't have an account</a>
                                 </div>
-                                {{-- <div>
-                                    <a href="#">Esqueci a minha senha</a>
-                                </div> --}}
+                                <div>
+                                    <a href="{{ route('forgot_password') }}">I forgot my password</a>
+                                </div>
                             </div>
                             <div class="col text-end align-self-center">
                                 <button type="submit" class="btn btn-secondary px-5">Log in</button>
@@ -38,6 +38,12 @@
                         </div>
 
                     </form>
+
+                    @if(session('success'))
+                        <p class="alert alert-success text-center mt-3 p-2">
+                            Password reset successfully
+                        </p>
+                    @endif
 
                     @if(session('invalid_login'))
                         <div class="alert alert-danger text-center mt-4">

@@ -3,24 +3,22 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-// generated via "php artisan make:mail NewUserConfirmation" command
-class NewUserConfirmation extends Mailable
+class ResetPassword extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public $username, public $confirmation_link)
-    {
-        //
-    }
+    public function __construct(public $username, public $tokenLink)
+    {}
 
     /**
      * Get the message envelope.
@@ -29,7 +27,7 @@ class NewUserConfirmation extends Mailable
     {
         return new Envelope(
             from: new Address('laravel@gmail.com', 'Laravel'),
-            subject: 'Registration Confirmation',
+            subject: 'Password Recovery',
         );
     }
 
@@ -39,7 +37,7 @@ class NewUserConfirmation extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.new_user_confirmation',
+            view: 'mail.reset_password',
         );
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewUserConfirmation;
+use App\Mail\ResetPassword;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -14,12 +15,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AuthController extends Controller
 {
-    public function login() : View
+    public function login(): View
     {
         return view('auth.login');
     }
 
-    public function authenticate(Request $request) : RedirectResponse
+    public function authenticate(Request $request): RedirectResponse
     {
         // validate form
         $credentials = $request->validate(
@@ -41,20 +42,20 @@ class AuthController extends Controller
 
         // check if user exists
         $user = User::where('username', $credentials['username'])
-                    ->where('active', true)
-                    ->where(function($query){
-                        $query->whereNull('blocked_until')
-                              ->orWhere('blocked_until', '<=', now());
-                    })
-                    ->whereNotNull('email_verified_at')
-                    ->whereNull('deleted_at')
-                    ->first();
+            ->where('active', true)
+            ->where(function ($query) {
+                $query->whereNull('blocked_until')
+                    ->orWhere('blocked_until', '<=', now());
+            })
+            ->whereNotNull('email_verified_at')
+            ->whereNull('deleted_at')
+            ->first();
 
-        if(!$user)
+        if (!$user)
             return back()->withInput()->with(['invalid_login' => 'Invalid login']);
 
         // check if password is valid
-        if(!password_verify($credentials['password'], $user->password))
+        if (!password_verify($credentials['password'], $user->password))
             return back()->withInput()->with(['invalid_login' => 'Invalid login']);
 
         // update last login 
@@ -70,25 +71,25 @@ class AuthController extends Controller
         return redirect()->intended(route('home'));
     }
 
-    public function logout() : RedirectResponse
+    public function logout(): RedirectResponse
     {
         Auth::logout();
         return redirect()->route('login');
     }
 
-    public function register() : View
+    public function register(): View
     {
         return view('auth.register');
     }
 
-    public function storeUser(Request $request) : RedirectResponse|View
+    public function storeUser(Request $request): RedirectResponse|View
     {
         // form validation
         $request->validate(
             [
                 //unique:table,column (by default considers column name same as field, so it could be "unique:users")
                 //could specify via model name also: "unique:App\Model\User,username"
-                'username'              => 'required|min:3|max:30|unique:users,username', 
+                'username'              => 'required|min:3|max:30|unique:users,username',
                 'email'                 => 'required|email|unique:users,email',
                 'password'              => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
                 'password_confirmation' => 'required|same:password'
@@ -113,13 +114,13 @@ class AuthController extends Controller
         $result = Mail::to($user->email)->send(new NewUserConfirmation($user->username, $confirmation_link));
 
         // check if mail was successfully sent
-        if(!$result) {
+        if (!$result) {
             return back()->withInput()->with(['server_error' => 'An error occurred when sending confirmation mail.']);
         }
 
         // store user
         $user->save();
-        
+
         // show success view
         return view('auth.email_sent', ['email' => $user->email]);
     }
@@ -129,7 +130,7 @@ class AuthController extends Controller
         // check if token is valid
         $user = User::where('token', $token)->first();
 
-        if(!$user)
+        if (!$user)
             return redirect()->route('login');
 
         // confirm user registration
@@ -146,7 +147,7 @@ class AuthController extends Controller
         return view('auth.new_user_confirmation');
     }
 
-    public function profile() : View
+    public function profile(): View
     {
         return view('auth.profile');
     }
@@ -181,6 +182,75 @@ class AuthController extends Controller
 
         // show success message
         return redirect()->route('profile')->with(['success' => 'Password updated successfuly']);
+    }
 
+    public function forgotPassword(): View
+    {
+        return view('auth.forgot_password');
+    }
+
+    public function sendResetPasswordLink(Request $request)
+    {
+        // form validation
+        $request->validate(['email' => 'required|email']);
+
+        $genericMessage = 'Check your mailbox to proceed with password recovery';
+
+        // check if e-mail exists
+        $user = User::where('email', $request->email)->first();
+        if (!$user)
+            return back()->with(['server_message' => $genericMessage]);
+
+        // create link with token to send via e-mail
+        $user->token = Str::random(64);
+
+        $tokenLink = route('reset_password', ['token' => $user->token]);
+
+        // send e-mail for password recovery and check if it was sent
+        $result = Mail::to($user->email)->send(new ResetPassword($user->username, $tokenLink));
+        if (!$result)
+            return back()->with(['server_message' => $genericMessage]);
+
+        // store token
+        $user->save();
+
+        return back()->with(['server_message' => $genericMessage]);
+    }
+
+    public function resetPassword($token): View | RedirectResponse
+    {
+        // check if token is valid
+        $user = User::where('token', $token)->first();
+        if (!$user)
+            return redirect()->route('login');
+
+        return view('auth.reset_password', compact('token'));
+    }
+
+    public function resetPasswordUpdate(Request $request): RedirectResponse
+    {
+        // form validation
+        $request->validate(
+            [
+                'token'                     => 'required',
+                'new_password'              => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                'new_password_confirmation' => 'required|same:new_password'
+            ],
+            [
+                'new_password.regex' => 'New password must contain at least one lower-case letter, one upper-case letter and a number',
+            ]
+        );
+
+        // check if token is valid
+        $user = User::where('token', $request->token)->first();
+        if (!$user)
+            return redirect()->route('login');
+
+        // update password
+        $user->password = bcrypt($request->new_password);
+        $user->token = null;
+        $user->save();
+
+        return redirect()->route('login')->with(['success' => true]);
     }
 }
